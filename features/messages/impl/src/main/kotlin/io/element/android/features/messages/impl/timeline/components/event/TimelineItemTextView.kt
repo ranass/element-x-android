@@ -59,11 +59,19 @@ fun TimelineItemTextView(
         LocalTextStyle provides textStyle
     ) {
         val text = getTextWithResolvedMentions(content)
+        val urlPreview = content.urlPreviews?.first()
         Box(modifier.semantics { contentDescription = content.plainText }) {
             Column(
                 modifier = Modifier.padding(4.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                if (!urlPreview.isNullOrBlank()) {
+                    EditorStyledText(
+                        text = urlPreview,
+                        style = ElementRichTextEditorStyle.textStyle(),
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
                 EditorStyledText(
                     text = text,
                     onLinkClickedListener = onLinkClick,
@@ -72,7 +80,6 @@ fun TimelineItemTextView(
                     onTextLayout = ContentAvoidingLayout.measureLegacyLastTextLine(onContentLayoutChange = onContentLayoutChange),
                     releaseOnDetach = false,
                 )
-                Text(text = "Ceci est mon test")
             }
         }
     }
