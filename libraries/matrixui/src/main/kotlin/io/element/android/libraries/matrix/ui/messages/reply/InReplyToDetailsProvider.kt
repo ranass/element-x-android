@@ -37,11 +37,14 @@ open class InReplyToDetailsProvider : PreviewParameterProvider<InReplyToDetails>
         get() = sequenceOf(
             aMessageContent(
                 body = "Message which are being replied.",
-                type = TextMessageType("Message which are being replied.", null)
+                type = TextMessageType(
+                    "Message which are being replied.", null,
+                    urlPreviews = null
+                )
             ),
             aMessageContent(
                 body = "Message which are being replied, and which was long enough to be displayed on two lines (only!).",
-                type = TextMessageType("Message which are being replied, and which was long enough to be displayed on two lines (only!).", null)
+                type = TextMessageType("Message which are being replied, and which was long enough to be displayed on two lines (only!).", null, null)
             ),
             aMessageContent(
                 body = "Video",
@@ -100,7 +103,7 @@ class InReplyToDetailsDisambiguatedProvider : InReplyToDetailsProvider() {
         get() = sequenceOf(
             aMessageContent(
                 body = "Message which are being replied.",
-                type = TextMessageType("Message which are being replied.", null)
+                type = TextMessageType("Message which are being replied.", null, null)
             ),
         ).map {
             aInReplyToDetails(
@@ -138,7 +141,7 @@ private fun aMessageContent(
     inReplyTo = null,
     isEdited = false,
     isThreaded = false,
-    type = type,
+    type = type
 )
 
 private fun aInReplyToDetails(

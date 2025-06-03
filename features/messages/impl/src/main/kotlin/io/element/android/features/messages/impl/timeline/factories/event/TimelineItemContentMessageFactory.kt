@@ -80,6 +80,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                     ),
                     formattedBody = formattedBody,
                     isEdited = content.isEdited,
+                    urlPreviews = null
                 )
             }
             is ImageMessageType -> {
@@ -129,6 +130,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                         htmlDocument = null,
                         formattedBody = body,
                         isEdited = content.isEdited,
+                        urlPreviews = null
                     )
                 } else {
                     TimelineItemLocationContent(
@@ -229,6 +231,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                     htmlDocument = htmlDocument,
                     formattedBody = formattedBody,
                     isEdited = content.isEdited,
+                    urlPreviews = null
                 )
             }
             is TextMessageType -> {
@@ -241,6 +244,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                     htmlDocument = messageType.formatted?.toHtmlDocument(permalinkParser = permalinkParser),
                     formattedBody = formattedBody,
                     isEdited = content.isEdited,
+                    urlPreviews = messageType.urlPreviews
                 )
             }
             is OtherMessageType -> {
@@ -250,6 +254,7 @@ class TimelineItemContentMessageFactory @Inject constructor(
                     htmlDocument = null,
                     formattedBody = textPillificationHelper.pillify(body).safeLinkify(),
                     isEdited = content.isEdited,
+                    urlPreviews = null
                 )
             }
         }

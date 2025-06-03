@@ -19,6 +19,7 @@ import io.element.android.libraries.matrix.api.timeline.item.event.MessageFormat
 import io.element.android.libraries.matrix.api.timeline.item.event.NoticeMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.OtherMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.TextMessageType
+import io.element.android.libraries.matrix.api.timeline.item.event.UrlPreview
 import io.element.android.libraries.matrix.api.timeline.item.event.VideoMessageType
 import io.element.android.libraries.matrix.api.timeline.item.event.VoiceMessageType
 import io.element.android.libraries.matrix.impl.media.map
@@ -30,6 +31,7 @@ import org.matrix.rustcomponents.sdk.use
 import org.matrix.rustcomponents.sdk.FormattedBody as RustFormattedBody
 import org.matrix.rustcomponents.sdk.MessageFormat as RustMessageFormat
 import org.matrix.rustcomponents.sdk.MessageType as RustMessageType
+import org.matrix.rustcomponents.sdk.UrlPreview as RustUrlPreview
 
 class EventMessageMapper {
     private val inReplyToMapper by lazy { InReplyToMapper(TimelineEventContentMapper()) }
@@ -92,7 +94,7 @@ class EventMessageMapper {
             NoticeMessageType(type.content.body, type.content.formatted?.map())
         }
         is RustMessageType.Text -> {
-            TextMessageType(type.content.body, type.content.formatted?.map())
+            TextMessageType(type.content.body, type.content.formatted?.map(), type.content.urlPreviews?.map { it.map() })
         }
         is RustMessageType.Emote -> {
             EmoteMessageType(type.content.body, type.content.formatted?.map())
@@ -126,3 +128,8 @@ private fun RustMessageFormat.map(): MessageFormat {
         is RustMessageFormat.Unknown -> MessageFormat.UNKNOWN
     }
 }
+
+private fun RustUrlPreview.map(): UrlPreview = UrlPreview(
+    title = title,
+    description = description
+)
