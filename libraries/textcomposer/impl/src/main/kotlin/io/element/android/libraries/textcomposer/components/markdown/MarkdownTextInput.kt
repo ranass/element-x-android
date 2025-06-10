@@ -36,6 +36,7 @@ import io.element.android.libraries.textcomposer.model.MarkdownTextEditorState
 import io.element.android.libraries.textcomposer.model.Suggestion
 import io.element.android.libraries.textcomposer.model.SuggestionType
 import io.element.android.libraries.textcomposer.model.aMarkdownTextEditorState
+import io.element.android.libraries.textcomposer.utils.UrlDetector
 import io.element.android.wysiwyg.compose.RichTextEditorStyle
 import io.element.android.wysiwyg.compose.internal.applyStyleInCompose
 
@@ -48,6 +49,7 @@ fun MarkdownTextInput(
     onReceiveSuggestion: (Suggestion?) -> Unit,
     richTextEditorStyle: RichTextEditorStyle,
     onSelectRichContent: ((Uri) -> Unit)?,
+    onUrlsDetected: ((List<String>) -> Unit)? = null,
 ) {
     val canUpdateState = !subcomposing
 
@@ -104,6 +106,9 @@ fun MarkdownTextInput(
 
                         state.currentSuggestion = editable?.checkSuggestionNeeded()
                         onReceiveSuggestion(state.currentSuggestion)
+
+                        // Detect URLs for preview
+                        onUrlsDetected?.invoke(editable?.getURLs()?.toList() ?: emptyList())
                     }
                     onSelectionChangeListener = { selStart, selEnd ->
                         state.selection = selStart..selEnd
@@ -177,6 +182,13 @@ private fun Editable.checkSuggestionNeeded(): Suggestion? {
     }
 }
 
+private fun Editable.getURLs(): Array<String> {
+    if (this.isEmpty()) return arrayOf()
+
+    val urls = UrlDetector.detectUrls(this)
+    return urls.map { it.url }.toTypedArray()
+}
+
 @PreviewsDayNight
 @Composable
 internal fun MarkdownTextInputPreview() {
@@ -189,6 +201,7 @@ internal fun MarkdownTextInputPreview() {
             onReceiveSuggestion = {},
             richTextEditorStyle = style,
             onSelectRichContent = {},
+            onUrlsDetected = {},
         )
     }
 }

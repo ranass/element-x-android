@@ -8,6 +8,8 @@
 package io.element.android.features.messages.impl.timeline.model.event
 
 import androidx.compose.runtime.Immutable
+import io.element.android.features.poll.api.pollcontent.PollAnswerItem
+import io.element.android.libraries.matrix.api.timeline.item.event.UrlPreview
 import org.jsoup.nodes.Document
 
 /**
@@ -33,4 +35,8 @@ sealed interface TimelineItemTextBasedContent :
     /** The raw HTML body of the event. */
     val htmlBody: String?
         get() = htmlDocument?.body()?.html()
+
+    // TODO Replace by urlPreview object
+    /** The information to display the url previews */
+    val urlPreviews: List<UrlPreview>?
 }

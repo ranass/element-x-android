@@ -71,6 +71,14 @@ internal fun MessageComposerView(
         state.eventSink(MessageComposerEvents.TypingNotice(typing))
     }
 
+    fun onUrlsDetected(urls: List<String>) {
+        state.eventSink(MessageComposerEvents.UrlsDetected(urls))
+    }
+
+    fun onRemoveUrlPreview(detectedUrl: io.element.android.libraries.textcomposer.model.DetectedUrl) {
+        state.eventSink(MessageComposerEvents.RemoveUrlPreview(detectedUrl))
+    }
+
     val coroutineScope = rememberCoroutineScope()
     fun onRequestFocus() {
         coroutineScope.launch {
@@ -117,6 +125,9 @@ internal fun MessageComposerView(
         onError = ::onError,
         onTyping = ::onTyping,
         onSelectRichContent = ::sendUri,
+        urlPreviewState = state.urlPreviewState,
+        onUrlsDetected = ::onUrlsDetected,
+        onRemoveUrlPreview = ::onRemoveUrlPreview,
     )
 }
 

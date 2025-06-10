@@ -274,10 +274,9 @@ class RustTimeline(
         htmlBody: String?,
         intentionalMentions: List<IntentionalMention>,
     ): Result<Unit> = withContext(dispatcher) {
-        MessageEventContent.from(body, htmlBody, intentionalMentions).use { content ->
-            runCatching<Unit> {
-                inner.send(content)
-            }
+        runCatching<Unit> {
+            val msg = inner.parseMd(body);
+            inner.send(msg)
         }
     }
 

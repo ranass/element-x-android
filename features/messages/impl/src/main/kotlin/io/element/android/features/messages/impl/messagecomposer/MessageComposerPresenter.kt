@@ -66,17 +66,20 @@ import io.element.android.libraries.permissions.api.PermissionsPresenter
 import io.element.android.libraries.preferences.api.store.SessionPreferencesStore
 import io.element.android.libraries.textcomposer.mentions.MentionSpanProvider
 import io.element.android.libraries.textcomposer.mentions.ResolvedSuggestion
+import io.element.android.libraries.textcomposer.model.DetectedUrl
 import io.element.android.libraries.textcomposer.model.MarkdownTextEditorState
 import io.element.android.libraries.textcomposer.model.Message
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
 import io.element.android.libraries.textcomposer.model.Suggestion
 import io.element.android.libraries.textcomposer.model.TextEditorState
+import io.element.android.libraries.textcomposer.model.UrlPreviewState
 import io.element.android.libraries.textcomposer.model.rememberMarkdownTextEditorState
 import io.element.android.services.analytics.api.AnalyticsService
 import io.element.android.services.analyticsproviders.api.trackers.captureInteraction
 import io.element.android.wysiwyg.compose.RichTextEditorState
 import io.element.android.wysiwyg.display.TextDisplay
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -90,6 +93,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
@@ -127,6 +131,9 @@ class MessageComposerPresenter @AssistedInject constructor(
     private val cameraPermissionPresenter = permissionsPresenterFactory.create(Manifest.permission.CAMERA)
     private var pendingEvent: MessageComposerEvents? = null
     private val suggestionSearchTrigger = MutableStateFlow<Suggestion?>(null)
+
+    // Job to manage URL preview simulation with delay
+    private var urlPreviewJob: Job? = null
 
     // Used to disable some UI related elements in tests
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -195,6 +202,9 @@ class MessageComposerPresenter @AssistedInject constructor(
 
         val suggestions = remember { mutableStateListOf<ResolvedSuggestion>() }
         ResolveSuggestionsEffect(suggestions)
+
+        // URL Preview state
+        var urlPreviewState by remember { mutableStateOf(UrlPreviewState()) }
 
         DisposableEffect(Unit) {
             // Declare that the user is not typing anymore when the composer is disposed
@@ -339,6 +349,46 @@ class MessageComposerPresenter @AssistedInject constructor(
                     val draft = createDraftFromState(markdownTextEditorState, richTextEditorState)
                     appCoroutineScope.updateDraft(draft, isVolatile = false)
                 }
+                is MessageComposerEvents.UrlsDetected -> {
+                    // Cancel any existing URL preview job
+                    urlPreviewJob?.cancel()
+                    val deletedUrlsByUrl = urlPreviewState.detectedUrls.associateBy { it.url }
+
+                    // Convert detected URLs to DetectedUrl objects with loading state
+                    val detectedUrls = event.urls.distinct().map { url ->
+                        deletedUrlsByUrl[url] ?: DetectedUrl(
+                            url = url,
+                            isLoading = true
+                        )
+                    }
+                    urlPreviewState = urlPreviewState.copy(detectedUrls = detectedUrls.toImmutableList())
+
+                    // TODO implement preview retrieval
+                    // Start a new coroutine to simulate URL preview loading after 5 seconds
+                    if (detectedUrls.isNotEmpty()) {
+                        urlPreviewJob = appCoroutineScope.launch {
+                            delay(5000) // Wait 5 seconds
+
+                            // Generate dummy URL preview data for testing
+                            val updatedUrls = detectedUrls.map { detectedUrl ->
+                                if (detectedUrl.isLoading) {
+                                    detectedUrl.copy(
+                                        isLoading = false,
+                                        title = "Mon super titre pour ${detectedUrl.url}",
+                                        description = "Ma super description"
+                                    )
+                                } else {
+                                    detectedUrl
+                                }
+                            }
+                            urlPreviewState = urlPreviewState.copy(detectedUrls = updatedUrls.toImmutableList())
+                        }
+                    }
+                }
+                is MessageComposerEvents.RemoveUrlPreview -> {
+                    val updatedUrls = urlPreviewState.detectedUrls.filterNot { it == event.detectedUrl }
+                    urlPreviewState = urlPreviewState.copy(detectedUrls = updatedUrls.toImmutableList())
+                }
             }
         }
 
@@ -369,6 +419,7 @@ class MessageComposerPresenter @AssistedInject constructor(
             canShareLocation = canShareLocation.value,
             canCreatePoll = canCreatePoll.value,
             suggestions = suggestions.toPersistentList(),
+            urlPreviewState = urlPreviewState,
             resolveMentionDisplay = resolveMentionDisplay,
             resolveAtRoomMentionDisplay = resolveAtRoomMentionDisplay,
             eventSink = { handleEvents(it) },

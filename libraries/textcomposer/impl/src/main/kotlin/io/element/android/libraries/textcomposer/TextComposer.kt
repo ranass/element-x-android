@@ -68,8 +68,10 @@ import io.element.android.libraries.textcomposer.components.VoiceMessageRecordin
 import io.element.android.libraries.textcomposer.components.markdown.MarkdownTextInput
 import io.element.android.libraries.textcomposer.components.textInputRoundedCornerShape
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
+import io.element.android.libraries.textcomposer.model.DetectedUrl
 import io.element.android.libraries.textcomposer.model.Suggestion
 import io.element.android.libraries.textcomposer.model.TextEditorState
+import io.element.android.libraries.textcomposer.model.UrlPreviewState
 import io.element.android.libraries.textcomposer.model.VoiceMessagePlayerEvent
 import io.element.android.libraries.textcomposer.model.VoiceMessageRecorderEvent
 import io.element.android.libraries.textcomposer.model.VoiceMessageState
@@ -110,6 +112,9 @@ fun TextComposer(
     modifier: Modifier = Modifier,
     showTextFormatting: Boolean = false,
     subcomposing: Boolean = false,
+    urlPreviewState: UrlPreviewState = UrlPreviewState(),
+    onUrlsDetected: (List<String>) -> Unit = {},
+    onRemoveUrlPreview: (DetectedUrl) -> Unit = {},
 ) {
     val markdown = when (state) {
         is TextEditorState.Markdown -> state.state.text.value()
@@ -195,6 +200,8 @@ fun TextComposer(
                         placeholder = placeholder,
                         showPlaceholder = state.state.text.value().isEmpty(),
                         subcomposing = subcomposing,
+                        urlPreviewState = urlPreviewState,
+                        onRemoveUrlPreview = onRemoveUrlPreview,
                     ) {
                         MarkdownTextInput(
                             state = state.state,
@@ -203,6 +210,7 @@ fun TextComposer(
                             onReceiveSuggestion = onReceiveSuggestion,
                             richTextEditorStyle = style,
                             onSelectRichContent = onSelectRichContent,
+                            onUrlsDetected = onUrlsDetected,
                         )
                     }
                 }
@@ -479,6 +487,8 @@ private fun TextInputBox(
     placeholder: String,
     showPlaceholder: Boolean,
     subcomposing: Boolean,
+    urlPreviewState: UrlPreviewState = UrlPreviewState(),
+    onRemoveUrlPreview: (DetectedUrl) -> Unit = {},
     textInput: @Composable () -> Unit,
 ) {
     val bgColor = ElementTheme.colors.bgSubtleSecondary
@@ -499,6 +509,13 @@ private fun TextInputBox(
                 onResetComposerMode = onResetComposerMode,
             )
         }
+
+        // URL Preview View - positioned after ComposerModeView
+        UrlPreviewView(
+            urlPreviewState = urlPreviewState,
+            onRemoveUrl = onRemoveUrlPreview,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
         val defaultTypography = ElementTheme.typography.fontBodyLgRegular
         Box(
             modifier = Modifier
@@ -561,6 +578,8 @@ private fun TextInput(
         placeholder = placeholder,
         showPlaceholder = state.messageHtml.isEmpty(),
         subcomposing = subcomposing,
+        urlPreviewState = UrlPreviewState(),
+        onRemoveUrlPreview = {},
     ) {
         RichTextEditor(
             state = state,
@@ -935,6 +954,9 @@ private fun ATextComposer(
         resolveMentionDisplay = { _, _ -> TextDisplay.Plain },
         resolveAtRoomMentionDisplay = { TextDisplay.Plain },
         onSelectRichContent = null,
+        urlPreviewState = UrlPreviewState(),
+        onUrlsDetected = {},
+        onRemoveUrlPreview = {},
     )
 }
 

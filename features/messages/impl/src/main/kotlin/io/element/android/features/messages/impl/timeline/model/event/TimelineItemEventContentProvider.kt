@@ -69,6 +69,7 @@ fun aTimelineItemEmoteContent(
     htmlDocument = htmlDocument,
     formattedBody = formattedBody,
     isEdited = isEdited,
+    urlPreviews = null
 )
 
 fun aTimelineItemEncryptedContent() = TimelineItemEncryptedContent(
@@ -85,6 +86,7 @@ fun aTimelineItemNoticeContent(
     htmlDocument = htmlDocument,
     formattedBody = formattedBody,
     isEdited = isEdited,
+    urlPreviews = null
 )
 
 fun aTimelineItemRedactedContent() = TimelineItemRedactedContent
@@ -99,6 +101,7 @@ fun aTimelineItemTextContent(
     htmlDocument = htmlDocument,
     formattedBody = formattedBody,
     isEdited = isEdited,
+    urlPreviews = null
 )
 
 fun aTimelineItemUnknownContent() = TimelineItemUnknownContent

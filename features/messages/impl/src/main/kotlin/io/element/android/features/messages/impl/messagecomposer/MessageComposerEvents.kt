@@ -10,6 +10,7 @@ package io.element.android.features.messages.impl.messagecomposer
 import android.net.Uri
 import androidx.compose.runtime.Immutable
 import io.element.android.libraries.textcomposer.mentions.ResolvedSuggestion
+import io.element.android.libraries.textcomposer.model.DetectedUrl
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
 import io.element.android.libraries.textcomposer.model.Suggestion
 
@@ -36,4 +37,6 @@ sealed interface MessageComposerEvents {
     data class SuggestionReceived(val suggestion: Suggestion?) : MessageComposerEvents
     data class InsertSuggestion(val resolvedSuggestion: ResolvedSuggestion) : MessageComposerEvents
     data object SaveDraft : MessageComposerEvents
+    data class UrlsDetected(val urls: List<String>) : MessageComposerEvents
+    data class RemoveUrlPreview(val detectedUrl: DetectedUrl) : MessageComposerEvents
 }

@@ -96,7 +96,8 @@ data class NoticeMessageType(
 
 data class TextMessageType(
     val body: String,
-    val formatted: FormattedBody?
+    val formatted: FormattedBody?,
+    val urlPreviews: List<UrlPreview>?
 ) : MessageType
 
 data class OtherMessageType(
