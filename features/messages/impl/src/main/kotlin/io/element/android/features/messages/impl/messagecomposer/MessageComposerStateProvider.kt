@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.element.android.libraries.textcomposer.mentions.ResolvedSuggestion
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
 import io.element.android.libraries.textcomposer.model.TextEditorState
+import io.element.android.libraries.textcomposer.model.UrlPreviewState
 import io.element.android.libraries.textcomposer.model.aTextEditorStateRich
 import io.element.android.wysiwyg.display.TextDisplay
 import kotlinx.collections.immutable.ImmutableList
@@ -32,6 +33,7 @@ fun aMessageComposerState(
     canShareLocation: Boolean = true,
     canCreatePoll: Boolean = true,
     suggestions: ImmutableList<ResolvedSuggestion> = persistentListOf(),
+    urlPreviewState: UrlPreviewState = UrlPreviewState(),
     eventSink: (MessageComposerEvents) -> Unit = {},
 ) = MessageComposerState(
     textEditorState = textEditorState,
@@ -42,6 +44,7 @@ fun aMessageComposerState(
     canShareLocation = canShareLocation,
     canCreatePoll = canCreatePoll,
     suggestions = suggestions,
+    urlPreviewState = urlPreviewState,
     resolveMentionDisplay = { _, _ -> TextDisplay.Plain },
     resolveAtRoomMentionDisplay = { TextDisplay.Plain },
     eventSink = eventSink,
